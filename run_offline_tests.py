@@ -2,6 +2,7 @@
 from pathlib import Path
 import socket
 import os
+import sys
 import unittest
 from unittest.mock import patch
 
@@ -41,6 +42,8 @@ class IsolatedEnvironmentResult(unittest.TextTestResult):
         super().stopTest(test)
 
 if __name__=="__main__":
+    # Discovery imports this module; retain native socket handles captured above.
+    sys.modules.setdefault('run_offline_tests',sys.modules[__name__])
     with patch.object(socket,"socketpair",local_socketpair),patch.object(socket.socket,"connect",denied),patch.object(socket.socket,"connect_ex",denied),patch.object(socket,"create_connection",denied):
         # Source connector imports must not load a developer's real .env during discovery.
         with patch("dotenv.load_dotenv",return_value=False):
